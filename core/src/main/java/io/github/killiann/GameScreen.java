@@ -1,8 +1,13 @@
 package io.github.killiann;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Polygon;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.ScreenUtils;
 
 /** First screen of the application. Displayed after the application is created. */
@@ -11,57 +16,76 @@ public class GameScreen implements Screen {
     final Brick game;
     OrthographicCamera camera;
 
+    private World world;
+    private Box2DDebugRenderer b2dr;
+
+    private Paddle paddle;
+
+    private ShapeRenderer shapeRenderer;
+
     public GameScreen(final Brick game) {
         this.game = game;
 
-        // create the camera and the SpriteBatch
+        // Create the camera and the SpriteBatch
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 800, 480);
+
+        // Initialize Box2D world with no gravity
+        world = new World(new Vector2(0, 0), true); // Gravity set to zero
+        b2dr = new Box2DDebugRenderer();
+
+        shapeRenderer = new ShapeRenderer();
+
+        // Create the paddle
+        paddle = new Paddle(world, 400, 240, 50f, 25f); // Set position and size
     }
 
     @Override
-    public void show() {
-        // Prepare your screen here.
-    }
+    public void show() {}
 
     @Override
     public void render(float delta) {
-        // clear the screen with a dark blue color. The
-        // arguments to clear are the red, green
-        // blue and alpha component in the range [0,1]
-        // of the color to be used to clear the screen.
         ScreenUtils.clear(0, 0, 0.2f, 1);
-
-        // tell the camera to update its matrices.
         camera.update();
-
-        // tell the SpriteBatch to render in the
-        // coordinate system specified by the camera.
         game.batch.setProjectionMatrix(camera.combined);
+
+        // Check for input and move the body
+        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+            paddle.getBody().setLinearVelocity(-paddle.getSpeed(), paddle.getBody().getLinearVelocity().y); // Move left
+        } else if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+            paddle.getBody().setLinearVelocity(paddle.getSpeed(), paddle.getBody().getLinearVelocity().y); // Move right
+        } else {
+            paddle.getBody().setLinearVelocity(0, paddle.getBody().getLinearVelocity().y); // Stop horizontal movement
+        }
+
+        world.step(delta, 6, 2);
+
+        // Render the paddle
+        shapeRenderer.setProjectionMatrix(camera.combined);
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        paddle.render(shapeRenderer);
+        shapeRenderer.end();
+
+        // Render Box2D debug shapes
+        b2dr.render(world, camera.combined);
     }
 
     @Override
-    public void resize(int width, int height) {
-        // Resize your screen here. The parameters represent the new window size.
-    }
+    public void resize(int width, int height) {}
 
     @Override
-    public void pause() {
-        // Invoked when your application is paused.
-    }
+    public void pause() {}
 
     @Override
-    public void resume() {
-        // Invoked when your application is resumed after pause.
-    }
+    public void resume() {}
 
     @Override
-    public void hide() {
-        // This method is called when another screen replaces this one.
-    }
+    public void hide() {}
 
     @Override
     public void dispose() {
-        // Destroy screen's assets here.
+        world.dispose();
+        b2dr.dispose();
+        shapeRenderer.dispose(); // Dispose of ShapeRenderer
     }
 }
