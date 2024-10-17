@@ -28,7 +28,7 @@ public class GameScreen implements Screen {
 
         // Create the camera and the SpriteBatch
         camera = new OrthographicCamera();
-        camera.setToOrtho(false, 800, 480);
+        camera.setToOrtho(false, 480, 800);
 
         // Initialize Box2D world with no gravity
         world = new World(new Vector2(0, 0), true); // Gravity set to zero
@@ -36,9 +36,13 @@ public class GameScreen implements Screen {
 
         shapeRenderer = new ShapeRenderer();
 
+        // Calculate the center position based on camera dimensions
+        float centerX = camera.viewportWidth / 2;
+        float centerY = camera.viewportHeight / 2;
+
         // Create the paddle and ball
-        paddle = new Paddle(world, 400, 30, 120f, 20f); // Set position and size
-        ball = new Ball(world, 400, 240, 10f);
+        paddle = new Paddle(world, centerX, 30, 120f, 20f); // Set position and size
+        ball = new Ball(world, centerX, centerY, 10f);
     }
 
     @Override
@@ -61,11 +65,31 @@ public class GameScreen implements Screen {
 
         world.step(delta, 6, 2);
 
+        // Get the ball's position and velocity
+        Vector2 ballPosition = ball.getBody().getPosition();
+        Vector2 ballVelocity = ball.getBody().getLinearVelocity();
+
+        // Check for boundary collisions and reverse velocity if needed
+        if (ballPosition.x - ball.getRadius() < 0) {
+            ball.getBody().setLinearVelocity(Math.abs(ballVelocity.x), ballVelocity.y); // Bounce off left edge
+        }
+        if (ballPosition.x + ball.getRadius() > 480) {
+            ball.getBody().setLinearVelocity(-Math.abs(ballVelocity.x), ballVelocity.y); // Bounce off right edge
+        }
+        if (ballPosition.y + ball.getRadius() > 800) {
+            ball.getBody().setLinearVelocity(ballVelocity.x, -Math.abs(ballVelocity.y)); // Bounce off top edge
+        }
+        if (ballPosition.y - ball.getRadius() < 0) {
+            System.out.println("GAME OVER"); // Bounce off bottom edge
+        }
+
         // Check for collision with the paddle
-        if (ball.getBody().getPosition().y - ball.getRadius() <= paddle.getBody().getPosition().y + paddle.getHeight() / 2) {
-            // Simple collision response: reverse ball's vertical velocity
-            Vector2 ballVelocity = ball.getBody().getLinearVelocity();
+        if (ballPosition.y - ball.getRadius() <= paddle.getBody().getPosition().y + paddle.getHeight() / 2 &&
+            ballPosition.x > paddle.getBody().getPosition().x - paddle.getWidth() / 2 &&
+            ballPosition.x < paddle.getBody().getPosition().x + paddle.getWidth() / 2) {
+
             ball.getBody().setLinearVelocity(ballVelocity.x, -ballVelocity.y);
+
             // Update ball position to avoid sinking into the paddle
             ball.getBody().setTransform(ball.getBody().getPosition().x,
                 paddle.getBody().getPosition().y + paddle.getHeight() / 2 + ball.getRadius(),

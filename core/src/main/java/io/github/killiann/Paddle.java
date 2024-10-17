@@ -30,7 +30,7 @@ public class Paddle {
         FixtureDef fixtureDef = new FixtureDef();
         fixtureDef.shape = rectangle;
         fixtureDef.density = 1.0f;
-        fixtureDef.friction = 0.5f;
+        fixtureDef.friction = 0f;
         body.createFixture(fixtureDef);
 
         rectangle.dispose(); // Dispose of the shape after creating the fixture
@@ -53,6 +53,10 @@ public class Paddle {
 
     public float getHeight() {
         return this.height;
+    }
+
+    public float getWidth() {
+        return this.width;
     }
 
 }

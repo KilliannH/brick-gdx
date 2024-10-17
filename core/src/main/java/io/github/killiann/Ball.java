@@ -7,10 +7,11 @@ import com.badlogic.gdx.physics.box2d.*;
 public class Ball {
     private Body body;
     private float radius;
-    private float speed = 5f;
+    private float speed;
 
     public Ball(World world, float x, float y, float radius) {
         this.radius = radius;
+        this.speed = 5f;
 
         // Create body definition
         BodyDef bodyDef = new BodyDef();
@@ -28,11 +29,11 @@ public class Ball {
         FixtureDef fixtureDef = new FixtureDef();
         fixtureDef.shape = circle;
         fixtureDef.density = 1.0f;
-        fixtureDef.friction = 0.5f;
+        fixtureDef.friction = 0f;
         body.createFixture(fixtureDef);
 
         circle.dispose(); // Dispose of the shape after creating the fixture
-        body.setLinearVelocity(0, -speed * 500);
+        body.setLinearVelocity(speed * 100, -speed * 100);
     }
 
     public void render(ShapeRenderer shapeRenderer) {
