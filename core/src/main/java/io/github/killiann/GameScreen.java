@@ -5,7 +5,6 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.ScreenUtils;
@@ -13,17 +12,18 @@ import com.badlogic.gdx.utils.ScreenUtils;
 /** First screen of the application. Displayed after the application is created. */
 public class GameScreen implements Screen {
 
-    final Brick game;
+    final Main game;
     OrthographicCamera camera;
 
     private World world;
     private Box2DDebugRenderer b2dr;
 
     private Paddle paddle;
+    private Ball ball;
 
     private ShapeRenderer shapeRenderer;
 
-    public GameScreen(final Brick game) {
+    public GameScreen(final Main game) {
         this.game = game;
 
         // Create the camera and the SpriteBatch
@@ -36,8 +36,9 @@ public class GameScreen implements Screen {
 
         shapeRenderer = new ShapeRenderer();
 
-        // Create the paddle
-        paddle = new Paddle(world, 400, 240, 50f, 25f); // Set position and size
+        // Create the paddle and ball
+        paddle = new Paddle(world, 400, 30, 120f, 20f); // Set position and size
+        ball = new Ball(world, 400, 240, 10f);
     }
 
     @Override
@@ -60,10 +61,22 @@ public class GameScreen implements Screen {
 
         world.step(delta, 6, 2);
 
-        // Render the paddle
+        // Check for collision with the paddle
+        if (ball.getBody().getPosition().y - ball.getRadius() <= paddle.getBody().getPosition().y + paddle.getHeight() / 2) {
+            // Simple collision response: reverse ball's vertical velocity
+            Vector2 ballVelocity = ball.getBody().getLinearVelocity();
+            ball.getBody().setLinearVelocity(ballVelocity.x, -ballVelocity.y);
+            // Update ball position to avoid sinking into the paddle
+            ball.getBody().setTransform(ball.getBody().getPosition().x,
+                paddle.getBody().getPosition().y + paddle.getHeight() / 2 + ball.getRadius(),
+                ball.getBody().getAngle());
+        }
+
+        // Render the paddle and the ball
         shapeRenderer.setProjectionMatrix(camera.combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         paddle.render(shapeRenderer);
+        ball.render(shapeRenderer);
         shapeRenderer.end();
 
         // Render Box2D debug shapes

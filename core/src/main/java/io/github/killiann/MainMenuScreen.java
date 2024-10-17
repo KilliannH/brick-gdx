@@ -8,11 +8,11 @@ import com.badlogic.gdx.utils.ScreenUtils;
 /** First screen of the application. Displayed after the application is created. */
 public class MainMenuScreen implements Screen {
 
-    final Brick game;
+    final Main game;
 
     OrthographicCamera camera;
 
-    public MainMenuScreen(final Brick game) {
+    public MainMenuScreen(final Main game) {
         this.game = game;
 
         camera = new OrthographicCamera();

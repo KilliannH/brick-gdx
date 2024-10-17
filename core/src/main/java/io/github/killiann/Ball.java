@@ -4,15 +4,13 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 
-public class Paddle {
+public class Ball {
     private Body body;
-    private float width;
-    private float height;
+    private float radius;
     private float speed = 5f;
 
-    public Paddle(World world, float x, float y, float width, float height) {
-        this.width = width;
-        this.height = height;
+    public Ball(World world, float x, float y, float radius) {
+        this.radius = radius;
 
         // Create body definition
         BodyDef bodyDef = new BodyDef();
@@ -22,37 +20,33 @@ public class Paddle {
         // Create the body
         body = world.createBody(bodyDef);
 
-        // Create rectangle shape
-        PolygonShape rectangle = new PolygonShape();
-        rectangle.setAsBox(width / 2, height / 2); // Set size to the paddle
+        // Create circle shape
+        CircleShape circle = new CircleShape();
+        circle.setRadius(radius); // Set the radius of the circle
 
         // Create fixture definition and attach to body
         FixtureDef fixtureDef = new FixtureDef();
-        fixtureDef.shape = rectangle;
+        fixtureDef.shape = circle;
         fixtureDef.density = 1.0f;
         fixtureDef.friction = 0.5f;
         body.createFixture(fixtureDef);
 
-        rectangle.dispose(); // Dispose of the shape after creating the fixture
+        circle.dispose(); // Dispose of the shape after creating the fixture
+        body.setLinearVelocity(0, -speed * 500);
     }
 
     public void render(ShapeRenderer shapeRenderer) {
-        // Render the paddle
-        shapeRenderer.setColor(255, 0, 0, 1); // Set color to white
+        // Render the ball
+        shapeRenderer.setColor(1, 1, 1, 1); // Set color to white
         Vector2 position = body.getPosition();
-        shapeRenderer.rect(position.x - width / 2, position.y - height / 2, width, height);
+        shapeRenderer.circle(position.x, position.y, radius); // Draw the circle
     }
 
     public Body getBody() {
         return body;
     }
 
-    public float getSpeed() {
-        return this.speed * 1000;
+    public float getRadius() {
+        return this.radius;
     }
-
-    public float getHeight() {
-        return this.height;
-    }
-
 }
