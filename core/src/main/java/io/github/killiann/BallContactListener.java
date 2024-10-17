@@ -18,6 +18,9 @@ public class BallContactListener implements ContactListener {
             Ball ball = (Ball) (fixtureA.getBody().getUserData() instanceof Ball ? fixtureA.getBody().getUserData() : fixtureB.getBody().getUserData());
             ball.getBody().setLinearVelocity(ball.getBody().getLinearVelocity().x, -ball.getBody().getLinearVelocity().y);
 
+            // Destroy the brick
+            Brick brick = (Brick) (fixtureA.getBody().getUserData() instanceof Brick ? fixtureA.getBody().getUserData() : fixtureB.getBody().getUserData());
+            brick.toDestroy = true;
         } else {
             System.out.println("COLLISIONNNNNNN " + fixtureA.getBody().getUserData().toString() + " " + fixtureB.getBody().getUserData().toString());
         }

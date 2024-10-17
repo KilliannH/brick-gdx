@@ -119,7 +119,12 @@ public class GameScreen implements Screen {
         paddle.render(shapeRenderer);
         ball.render(shapeRenderer);
         for (Brick brick : bricks) {
-            brick.render(shapeRenderer);
+            if(brick.toDestroy) {
+                brick.destroy(world);
+            }
+            if(!brick.toDestroy) {
+                brick.render(shapeRenderer);
+            }
         }
         shapeRenderer.end();
 

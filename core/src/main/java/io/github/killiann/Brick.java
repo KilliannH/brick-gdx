@@ -8,6 +8,8 @@ public class Brick {
     private Body body;
     private float width;
     private float height;
+    public boolean toDestroy = false;
+    public boolean destroyed = false;
 
     public Brick(World world, float x, float y, float width, float height) {
         this.width = width;
@@ -45,5 +47,12 @@ public class Brick {
 
     public Body getBody() {
         return body;
+    }
+
+    public void destroy(World world) {
+        if(!destroyed) {
+            world.destroyBody(body);
+            this.destroyed = true;
+        }
     }
 }
