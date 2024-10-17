@@ -9,6 +9,9 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.ScreenUtils;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /** First screen of the application. Displayed after the application is created. */
 public class GameScreen implements Screen {
 
@@ -20,6 +23,7 @@ public class GameScreen implements Screen {
 
     private Paddle paddle;
     private Ball ball;
+    private List<Brick> bricks;
 
     private ShapeRenderer shapeRenderer;
 
@@ -41,8 +45,33 @@ public class GameScreen implements Screen {
         float centerY = camera.viewportHeight / 2;
 
         // Create the paddle and ball
-        paddle = new Paddle(world, centerX, 30, 120f, 20f); // Set position and size
+        paddle = new Paddle(world, centerX, 30, 120, 20); // Set position and size
         ball = new Ball(world, centerX, centerY, 10f);
+
+        bricks = new ArrayList<>();
+
+        // Create two rows of bricks
+        float brickWidth = 60f;
+        float brickHeight = 20f;
+        float spacing = 10f; // Space between bricks
+
+        int numberOfBricks = 6; // Number of bricks in each row
+        float totalWidth = (numberOfBricks * brickWidth) + ((numberOfBricks - 1) * spacing); // Total width of all bricks plus spacing
+        float startX = (camera.viewportWidth - totalWidth) / 2; // Starting x position to center
+
+        // First row
+        for (int i = 0; i < numberOfBricks; i++) {
+            float x = startX + (i * (brickWidth + spacing)) + (brickWidth / 2);
+            float y = 600; // Height for the first row
+            bricks.add(new Brick(world, x, y, brickWidth, brickHeight));
+        }
+
+        // Second row
+        for (int i = 0; i < numberOfBricks; i++) {
+            float x = startX + (i * (brickWidth + spacing)) + (brickWidth / 2);
+            float y =630; // Height for the second row
+            bricks.add(new Brick(world, x, y, brickWidth, brickHeight));
+        }
     }
 
     @Override
@@ -63,7 +92,8 @@ public class GameScreen implements Screen {
             paddle.getBody().setLinearVelocity(0, paddle.getBody().getLinearVelocity().y); // Stop horizontal movement
         }
 
-        world.step(delta, 6, 2);
+        world.step(1/60f, 6, 2);
+        world.setContactListener(new BallContactListener());
 
         // Get the ball's position and velocity
         Vector2 ballPosition = ball.getBody().getPosition();
@@ -83,24 +113,14 @@ public class GameScreen implements Screen {
             System.out.println("GAME OVER"); // Bounce off bottom edge
         }
 
-        // Check for collision with the paddle
-        if (ballPosition.y - ball.getRadius() <= paddle.getBody().getPosition().y + paddle.getHeight() / 2 &&
-            ballPosition.x > paddle.getBody().getPosition().x - paddle.getWidth() / 2 &&
-            ballPosition.x < paddle.getBody().getPosition().x + paddle.getWidth() / 2) {
-
-            ball.getBody().setLinearVelocity(ballVelocity.x, -ballVelocity.y);
-
-            // Update ball position to avoid sinking into the paddle
-            ball.getBody().setTransform(ball.getBody().getPosition().x,
-                paddle.getBody().getPosition().y + paddle.getHeight() / 2 + ball.getRadius(),
-                ball.getBody().getAngle());
-        }
-
         // Render the paddle and the ball
         shapeRenderer.setProjectionMatrix(camera.combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         paddle.render(shapeRenderer);
         ball.render(shapeRenderer);
+        for (Brick brick : bricks) {
+            brick.render(shapeRenderer);
+        }
         shapeRenderer.end();
 
         // Render Box2D debug shapes

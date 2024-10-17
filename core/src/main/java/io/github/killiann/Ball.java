@@ -11,7 +11,7 @@ public class Ball {
 
     public Ball(World world, float x, float y, float radius) {
         this.radius = radius;
-        this.speed = 5f;
+        this.speed = 10f;
 
         // Create body definition
         BodyDef bodyDef = new BodyDef();
@@ -30,10 +30,12 @@ public class Ball {
         fixtureDef.shape = circle;
         fixtureDef.density = 1.0f;
         fixtureDef.friction = 0f;
+
+        body.setUserData(this); // register for collision detection
+        body.setLinearVelocity(speed * 100, speed * 100);
         body.createFixture(fixtureDef);
 
         circle.dispose(); // Dispose of the shape after creating the fixture
-        body.setLinearVelocity(speed * 100, -speed * 100);
     }
 
     public void render(ShapeRenderer shapeRenderer) {
